@@ -123,7 +123,7 @@ void loop()
     month = (tmp / 100) % 100;
     year = tmp % 100;
     
-    Serial.print("\tTime: ");
+    Serial.print("\n\tTime: ");
     Serial.print(hour, DEC); Serial.print(':');
     Serial.print(minute, DEC); Serial.print(':');
     Serial.println(second, DEC);
