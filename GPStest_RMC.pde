@@ -1,12 +1,23 @@
 // A simple sketch to read GPS data and parse the $GPRMC string 
 // see http://www.ladyada.net/make/gpsshield for more info
 
-// Make sure to install newsoftserial from Mikal Hart
+// If using Arduino IDE prior to version 1.0,
+// make sure to install newsoftserial from Mikal Hart
 // http://arduiniana.org/libraries/NewSoftSerial/
-#include <NewSoftSerial.h>
+#if ARDUINO >= 100
+ #include "Arduino.h"
+ #include "SoftwareSerial.h"
+#else
+ #include "WProgram.h"
+ #include "NewSoftSerial.h"
+#endif
 
 // Use pins 2 and 3 to talk to the GPS. 2 is the TX pin, 3 is the RX pin
-NewSoftSerial mySerial =  NewSoftSerial(2, 3);
+#if ARDUINO >= 100
+SoftwareSerial mySerial = SoftwareSerial(2, 3);
+#else
+NewSoftSerial mySerial = NewSoftSerial(2, 3);
+#endif
 
 // Use pin 4 to control power to the GPS
 #define powerpin 4
@@ -54,6 +65,37 @@ void setup()
    digitalWrite(powerpin, LOW);         // pull low to turn on!
 } 
  
+uint32_t parsedecimal(char *str) {
+  uint32_t d = 0;
+  
+  while (str[0] != 0) {
+   if ((str[0] > '9') || (str[0] < '0'))
+     return d;
+   d *= 10;
+   d += str[0] - '0';
+   str++;
+  }
+  return d;
+}
+
+void readline(void) {
+  char c;
+  
+  buffidx = 0; // start at begninning
+  while (1) {
+      c=mySerial.read();
+      if (c == -1)
+        continue;
+      Serial.print(c);
+      if (c == '\n')
+        continue;
+      if ((buffidx == BUFFSIZ-1) || (c == '\r')) {
+        buffer[buffidx] = 0;
+        return;
+      }
+      buffer[buffidx++]= c;
+  }
+}
  
 void loop() 
 { 
@@ -157,34 +199,3 @@ void loop()
   //Serial.println(buffer);
 }
 
-uint32_t parsedecimal(char *str) {
-  uint32_t d = 0;
-  
-  while (str[0] != 0) {
-   if ((str[0] > '9') || (str[0] < '0'))
-     return d;
-   d *= 10;
-   d += str[0] - '0';
-   str++;
-  }
-  return d;
-}
-
-void readline(void) {
-  char c;
-  
-  buffidx = 0; // start at begninning
-  while (1) {
-      c=mySerial.read();
-      if (c == -1)
-        continue;
-      Serial.print(c);
-      if (c == '\n')
-        continue;
-      if ((buffidx == BUFFSIZ-1) || (c == '\r')) {
-        buffer[buffidx] = 0;
-        return;
-      }
-      buffer[buffidx++]= c;
-  }
-}
