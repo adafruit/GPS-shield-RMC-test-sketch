@@ -39,8 +39,8 @@ char buffidx;                // an indexer into the buffer
 
 // The time, date, location data, etc.
 uint8_t hour, minute, second, year, month, date;
-uint32_t latitude, longitude;
-uint8_t groundspeed, trackangle;
+uint32_t latitude, longitude, trackangle;
+uint8_t groundspeed;
 char latdir, longdir;
 char status;
 
